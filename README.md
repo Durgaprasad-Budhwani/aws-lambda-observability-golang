@@ -1,140 +1,320 @@
-# aws-lambda-observability-golang
 
-This is a sample template for aws-lambda-observability-golang - Below is a brief explanation of what we have generated for you:
+## AWS Lambda Observability — Golang
 
-```bash
-.
-├── Makefile                    <-- Make to automate build
-├── README.md                   <-- This instructions file
-├── hello-world                 <-- Source code for a lambda function
-│   ├── main.go                 <-- Lambda function code
-│   └── main_test.go            <-- Unit tests
-└── template.yaml
-```
+![](https://cdn-images-1.medium.com/max/3840/1*FUK36U86lLlrTHwBDk8vsw.png)
 
-## Requirements
+**Observability** is the ability to understand the state of a system by analyzing its outputs. It is an essential concept in computer science and engineering, as it allows you to monitor and understand the behaviour of complex systems, identify problems, and fix them before they cause significant issues.
 
-* AWS CLI already configured with Administrator permission
-* [Docker installed](https://www.docker.com/community-edition)
-* [Golang](https://golang.org)
-* SAM CLI - [Install the SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
+There are three main pillars of observability:
 
-## Setup process
+1. **Metrics**: Metrics are numerical values that can be collected and monitored over time. They can measure various aspects of a system’s behaviour, such as performance, resource utilization, and errors.
 
-### Installing dependencies & building the target 
+2. **Logs**: Logs are records of events that happen within a system. They can be used to understand the sequence of events that led to a particular problem and to identify trends and patterns over time.
 
-In this example we use the built-in `sam build` to automatically download all the dependencies and package our build target.   
-Read more about [SAM Build here](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-build.html) 
+3. **Tracing**: Tracing involves tracking the flow of a request as it travels through a system, from the point of origin to the final destination. It allows you to understand how different system components interact and can be used to identify issues with specific parts of the system.
 
-The `sam build` command is wrapped inside of the `Makefile`. To execute this simply run
- 
-```shell
-make
-```
+Using a combination of metrics, logs, and tracing, you can gain a deep understanding of the behaviour of your systems and identify issues before they become significant problems.
 
-### Local development
+In this article, you will learn how to achieve observability in AWS Lambda when the lambda runtime is [**Golang](https://go.dev/) **programming language**.**
 
-**Invoking function locally through local API Gateway**
+## Prerequisite
 
-```bash
-sam local start-api
-```
+To get started, you must have the following prerequisites:
 
-If the previous command ran successfully you should now be able to hit the following local endpoint to invoke your function `http://localhost:3000/hello`
+* [AWS Account](https://portal.aws.amazon.com/) with AWS Lambda creation access
 
-**SAM CLI** is used to emulate both Lambda and API Gateway locally and uses our `template.yaml` to understand how to bootstrap this environment (runtime, where the source code is, etc.) - The following excerpt is what the CLI will read in order to initialize an API and its routes:
+* [Golang Install](https://go.dev/dl/)
 
-```yaml
-...
-Events:
-    HelloWorld:
-        Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+* [AWS CLI ](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)Configure
+
+* [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html) Install
+
+* [Goland](https://www.jetbrains.com/go/) or VSCode
+
+## Getting Started:
+
+The easiest way to start writing Lambda functions with Golang is by using AWS SAM CLI. It is a command-line tool that you can use to build and test serverless applications defined with AWS Serverless Application Model (SAM)
+
+To create a Go sample application using the AWS SAM CLI, you will need to do the following:
+
+1. Please create a new project directory and navigate to it in your terminal.
+
+2. Run the following command to create a new Go application using the AWS SAM CLI:
+
+   sam init --runtime go1.x
+
+![](https://cdn-images-1.medium.com/max/3268/1*zdlaxMfUkJ_yCaJe7wKX_Q.png)
+
+This will create a new directory with the following structure:
+
+![](https://cdn-images-1.medium.com/max/2140/1*U_xK4fI3Xk_iiP-GM7oMZQ.png)
+
+1. The hello_world the directory contains a sample function that you can use as a starting point for your application. You can modify the main.go file to add your code and use the Makefile to build and test your function.
+
+2. The template.yaml The file contains a SAM template that defines your application's resources, such as AWS Lambda functions and Amazon S3 buckets. You can use this file to define the resources needed by your application.
+
+3. The events the directory contains sample event data you can use to test your function. You can modify the event.json file to create different test scenarios for your function.
+
+hello-world/main.go the file includes the AWS Lambda Handler code:
+
+<iframe src="https://medium.com/media/c5ca0e5db4ef4a745d07f793200a504a" frameborder=0></iframe>
+
+The program consists of two main parts:
+
+1. The main function, which is the entry point of the program. It uses the lambda.Start function to start the AWS Lambda runtime and passes the handler function as the function to be executed when the Lambda function is triggered.
+
+2. The handler function, which is the function that will be executed by AWS Lambda when the function is triggered. The handler function takes an events.APIGatewayProxyRequest as an input, which contains information about the HTTP request, and returns an, which contains the HTTP response that will be returned to the client.
+
+The handler the function does the following:
+
+1. Makes an HTTP GET request to the DefaultHTTPGetAddress URL using the http.Get function.
+
+2. If the request fails, it returns an empty events.APIGatewayProxyResponse and the error.
+
+3. If the request is successful, it checks the HTTP status code of the response. If the status code is not 200, it returns an empty events.APIGatewayProxyResponse and the ErrNon200Response error.
+
+4. If the status code is 200, it reads the response body using the ioutil.ReadAll function and stores the data in the ip variable.
+
+5. If the ip the variable is empty; it returns an empty events.APIGatewayProxyResponse and the ErrNoIP error.
+
+6. If the ip the variable is not empty; it returns an events.APIGatewayProxyResponse with the body set to a string containing the message "Hello, [IP]", where [IP] is the IP address read from the response body and a status code of 200.
+
+### Local Testing:
+
+sam local start-api is a command that you can use to start an API Gateway locally using the AWS Serverless Application Model (SAM) CLI. This can be useful for testing and debugging your serverless applications locally before deploying them to AWS.
+
+After running sam local start-api command, it will start an API Gateway locally and make it available at the default URL: http://127.0.0.1:3000. You can use the URL [http://127.0.0.1:3000/hello](http://127.0.0.1:3000/hello) to send HTTP requests to your locally-running API Gateway, and it will show you the current IP address:
+
+![](https://cdn-images-1.medium.com/max/2000/1*UaYrZgTzpl6i0ij-1nIPGg.png)
+
+You can also specify a different port number using the --port option. For example:
+
+    https://www.google.com/search?q=9%3A00+PM+IST+to+mountain+time&oq=9%3A00+PM+IST+to+mountain+time&aqs=cawrome..69i57.7088j0j4&sourceid=chrome&ie=UTF-8sam local start-api --port 8000
+
+This will start the API Gateway on port 8000.
+
+### **Deployment: **
+
+Once you have written and tested your function, you can use the AWS SAM CLI to package and deploy your application to AWS. To do this, run the following command:
+
+    sam build && sam deploy --guided
+
+This will package your application and deploy it to AWS, creating all the necessary resources in your AWS account.
+
+After successful deployment, it will create a simple stack with AWS Lambda and API Gateway with an endpoint based on API Gateway root resource id e.g.
+[https://gbwf8lkzwh.execute-api.us-east-1.amazonaws.com/Prod/hello/](https://gbwf8lkzwh.execute-api.us-east-1.amazonaws.com/Prod/hello/)
+
+![](https://cdn-images-1.medium.com/max/2000/1*sby904FNnv3GKQwEZdiLiw.png)
+
+![](https://cdn-images-1.medium.com/max/2000/1*uIp7Jqu4bZucohUDEL5GKA.png)
+
+### Tracing:
+
+In the .aws-sam/build/template.yaml, tracing is enabled for both the lambda function and the API gateway.
+
+![](https://cdn-images-1.medium.com/max/2000/1*pVHCA_XQH_UEViizoALEpw.png)
+
+You can navigate to AWS X-Ray Service in AWS Console to see end-to-end tracing.
+
+![](https://cdn-images-1.medium.com/max/3172/1*dgSlOYBG3dsRAbeU1jiMPA.png)
+
+**Amazon X-Ray** is a service that helps developers analyze and debug distributed applications, such as those built using a microservices architecture. X-Ray enables you to trace requests as they travel through your application and provides tools to visualize the request data and identify issues with the application.
+
+With X-Ray, you can understand how your application and its underlying resources are performing, identify and troubleshoot the root cause of performance issues, and optimize your application’s performance.
+
+To use X-Ray, you instrument your application code to send data to the X-Ray service. X-Ray then processes and visualizes the data, allowing you to analyze the data and identify issues with your application.
+
+You can use X-Ray with applications running on Amazon EC2, AWS Lambda, and other cloud and on-premises environments.
+
+The above example shows traceability from AWS API Gateway to the AWS Lambda function, but you can’t see traces for the external checkip service.
+
+## Instrumentation:
+
+There are two ways to instrument your Go application to send traces to X-Ray:
+
+* [AWS X-Ray SDK for Go](https://docs.aws.amazon.com/xray/latest/devguide/xray-sdk-go.html) — A set of libraries for generating and sending traces to X-Ray via the [X-Ray daemon](https://docs.aws.amazon.com/xray/latest/devguide/xray-daemon.html).
+
+* [AWS Distro for OpenTelemetry (ADOT) Go](https://docs.aws.amazon.com/xray/latest/devguide/xray-go-opentel-sdk.html) — An AWS distribution that provides a set of open-source libraries for sending correlated metrics and traces to multiple AWS monitoring solutions, including Amazon CloudWatch, AWS X-Ray, and Amazon OpenSearch Service, via the [AWS Distro for OpenTelemetry Collector](https://aws-otel.github.io/docs/getting-started/collector).
+>  AWS X-Ray recommends using AWS Distro for OpenTelemetry (ADOT) to instrument your application instead of this X-Ray SDK due to its more comprehensive range of features and instrumentations.
+Source — [https://github.com/aws/aws-xray-sdk-go](https://github.com/aws/aws-xray-sdk-go)
+
+This article will walk you through manually instrumenting your Lambda function using the ADOT Lambda Go SDK and applying the ADOT Lambda layer to enable end-to-end tracing.
+
+The ADOT Lambda Go SDK supports the provided.al2 Lambda runtime.
+
+### Change the Runtime of AWS Lambda:
+
+To convert from **go1.x **runtime to **provided.al2 **perform the following steps
+
+1. In template.yaml file, change the Runtime to provided.al2 and add Metadata with BuildMethod makefile in the lambda function section e.g.
+
+   HelloWorldFunction:
+   Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+   Properties:
+   CodeUri: hello-world/
+   Handler: bootstrap.is.the.handler
+   Runtime: provided.al2
+   Architectures:
+   - x86_64
+   Events:
+   CatchAll:
+   Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+   Properties:
+   Path: /hello
+   Method: GET
+   Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+   Variables:
+   PARAM1: VALUE
+   Metadata:
+   BuildMethod: makefile
+
+2. Create a Makefile inside hello-world the folder, which will generate the executable for the AWS Lambda. The executable name should be bootstrap for custom runtime.
+
+   .PHONY: build
+
+   build-HelloWorldFunction:
+   env GOOS=linux go build -ldflags="-s -w" -o $(ARTIFACTS_DIR)/bootstrap main.go
+
+### Code Instrumentation:
+
+1. Add dependencies for the [**ADOT Lambda Go SDK](https://pkg.go.dev/go.opentelemetry.io/contrib/instrumentation/github.com/aws/aws-lambda-go/otellambda)** and the [**recommended SDK configuration options for AWS X-Ray](https://pkg.go.dev/go.opentelemetry.io/contrib/instrumentation/github.com/aws/aws-lambda-go/otellambda/xrayconfig)**.
+
+   import (
+   "context"
+   "errors"
+   "fmt"
+   "io/ioutil"
+
+   "github.com/aws/aws-lambda-go/events"
+   "github.com/aws/aws-lambda-go/lambda"
+
+   "go.opentelemetry.io/contrib/instrumentation/github.com/aws/aws-lambda-go/otellambda"
+   "go.opentelemetry.io/contrib/instrumentation/github.com/aws/aws-lambda-go/otellambda/xrayconfig"
+   "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+   "go.opentelemetry.io/contrib/propagators/aws/xray"
+   "go.opentelemetry.io/otel"
+   )
+
+**OpenTelemetry** is an open-source project that provides a set of APIs, libraries, and tools for distributed tracing and metrics collection. It is designed to be vendor-agnostic, meaning it can be used with various tracing and metrics backends.
+
+The go.opentelemetry the package is the Go implementation of the OpenTelemetry APIs. It provides a set of Go packages that can instrument Go applications and send data to OpenTelemetry-compatible tracing and metrics backends.
+
+2. Add the below code, which uses configured tracer provider and shuts down the tracer provider in main() a function outside of the lambda handler.
+
+   func main() {
+   ctx := context.Background()
+
+   tp, err := xrayconfig.NewTracerProvider(ctx)
+   if err != nil {
+   fmt.Printf("error creating tracer provider: %v", err)
+   }
+
+   defer func(ctx context.Context) {
+   err := tp.Shutdown(ctx)
+   if err != nil {
+   fmt.Printf("error shutting down tracer provider: %v", err)
+   }
+   }(ctx)
+
+   otel.SetTracerProvider(tp)
+   otel.SetTextMapPropagator(xray.Propagator{})
+
+   }
+
+You can also configure their custom tracer provider and pass it on to the Go Lambda instrumentation wrapper.
+
+3. Wrap handler in the call to lambda.Start() or lambda.StartHandler() in main() function using the recommended X-Ray configuration options.
+
+   lambda.Start(otellambda.InstrumentHandler(handler, xrayconfig.WithRecommendedOptions(tp)...))
+
+In a Go-based AWS Lambda function, the context package provides several functions that can be used to interact with the execution context of the Lambda function.
+
+The context.Context type represents the execution context of the function. It is passed as an argument to the Lambda function handler and can be used to pass values between function invocations and to cancel or timeout function execution.
+
+The lambda handler code will be changed as follows:
+
+    func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+
+### Downstream HTTP Request Instrumentation:
+
+The go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp the package is a Go package that provides instrumentation for the net/http Package, which is part of the Go standard library. It allows you to instrument HTTP requests and responses made using the net/http package and send data to an OpenTelemetry-compatible tracing backend.
+
+In the above main.gocode, change the remove net/http and add go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp and change the request call http.Get to otelhttp.Get(ctx, passing the context, which has tracing information.
+
+Complete `main.go` code:
+
+<iframe src="https://medium.com/media/8bfe1894268ed697998738638bd449a2" frameborder=0></iframe>
+
+### Lambda Layer:
+
+AWS Lambda layers are a distribution mechanism for libraries, custom runtimes, and function code. Layers let you manage your in-development function code independently from the unchanging code and resources it uses.
+
+Layers are ZIP archives that contain libraries, a custom runtime, or even custom function code. You can manage layers separately from your function code and share them across multiple functions. This can make managing and maintaining your code more accessible, as you can update and publish a new layer version without updating your functions.
+
+To use a layer with a function, you specify the Amazon Resource Name (ARN) of the layer when you create or update your function. The layer is extracted to the /opt directory in the function execution environment, and its contents are available to the function code at runtime.
+
+This layer includes a reduced version of the [**AWS Distro for OpenTelemetry Collector (ADOT Collector)](https://github.com/aws-observability/aws-otel-collector)**, which runs as a Lambda extension.
+
+More information and supported version can be found on this [link](https://aws-otel.github.io/docs/getting-started/lambda/lambda-go)
+
+While writing this article, the layer ARN for (us-east-1 region) is:
+
+* For x86_64architecture:
+
+  arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-collector-amd64-ver-0-66-0:1
+
+* For arm64 architecture
+
+  arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-collector-arm64-ver-0-66-0:1
+
+To use this layer in the SAM template, modify the template.yaml code:
+
+      HelloWorldFunction:
+        Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
         Properties:
-            Path: /hello
-            Method: get
-```
+          CodeUri: hello-world/
+          Handler: bootstrap.is.the.handler
+          Runtime: provided.al2
+          Layers:
+            - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-collector-amd64-ver-0-66-0:1
+          Architectures:
+            - x86_64
+          Events:
+            CatchAll:
+              Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+              Properties:
+                Path: /hello
+                Method: GET
+          Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+            Variables:
+              PARAM1: VALUE
+        Metadata:
+          BuildMethod: makefile
 
-## Packaging and deployment
+After the deployment, opening the same URL on the browser will show your IP address.
 
-AWS Lambda Golang runtime requires a flat folder with the executable generated on build step. SAM will use `CodeUri` property to know where to look up for the application:
+On AWS X-Ray, you can see the downstream HTTP request shown below.
 
-```yaml
-...
-    FirstFunction:
-        Type: AWS::Serverless::Function
-        Properties:
-            CodeUri: hello_world/
-            ...
-```
+![AWS Lambda Downstream HTTP Request ](https://cdn-images-1.medium.com/max/3418/1*wamSnuCJREAV4XdXrOzSUg.png)
 
-To deploy your application for the first time, run the following in your shell:
 
-```bash
-sam deploy --guided
-```
 
-The command will package and deploy your application to AWS, with a series of prompts:
+## Cleanup
 
-* **Stack Name**: The name of the stack to deploy to CloudFormation. This should be unique to your account and region, and a good starting point would be something matching your project name.
-* **AWS Region**: The AWS region you want to deploy your app to.
-* **Confirm changes before deploy**: If set to yes, any change sets will be shown to you before execution for manual review. If set to no, the AWS SAM CLI will automatically deploy application changes.
-* **Allow SAM CLI IAM role creation**: Many AWS SAM templates, including this example, create AWS IAM roles required for the AWS Lambda function(s) included to access AWS services. By default, these are scoped down to minimum required permissions. To deploy an AWS CloudFormation stack which creates or modifies IAM roles, the `CAPABILITY_IAM` value for `capabilities` must be provided. If permission isn't provided through this prompt, to deploy this example you must explicitly pass `--capabilities CAPABILITY_IAM` to the `sam deploy` command.
-* **Save arguments to samconfig.toml**: If set to yes, your choices will be saved to a configuration file inside the project, so that in the future you can just re-run `sam deploy` without parameters to deploy changes to your application.
+For clean-up, you can use sam delete the command that will delete the CloudFormation stack.
 
-You can find your API Gateway Endpoint URL in the output values displayed after deployment.
+## Source Code
 
-### Testing
+For source code, please refer to the [link](https://github.com/Durgaprasad-Budhwani/aws-lambda-observability-golang)
 
-We use `testing` package that is built-in in Golang and you can simply run the following command to run our tests:
+## Conclusion:
 
-```shell
-go test -v ./hello-world/
-```
-# Appendix
+In summary, AWS Lambda provides several features and tools to improve your serverless applications' traceability and observability.
 
-### Golang installation
+* AWS X-Ray is a service that helps you analyze and debug distributed applications, such as those built using a microservices architecture. You can use X-Ray to trace requests as they travel through your application and visualize the request data to identify issues with your application.
 
-Please ensure Go 1.x (where 'x' is the latest version) is installed as per the instructions on the official golang website: https://golang.org/doc/install
+* The OpenTelemetry project provides a set of APIs, libraries, and tools for distributed tracing and metrics collection. You can use the Go implementation of these APIs, go.opentelemetry, to instrument your Go-based AWS Lambda functions and send data to an OpenTelemetry-compatible tracing backend.
 
-A quickstart way would be to use Homebrew, chocolatey or your linux package manager.
+* The context package in Go provides a set of types and functions for carrying contextual information in a request. You can use the context.Context type in your AWS Lambda function handlers to pass values between function invocations and to cancel or timeout function execution.
 
-#### Homebrew (Mac)
-
-Issue the following command from the terminal:
-
-```shell
-brew install golang
-```
-
-If it's already installed, run the following command to ensure it's the latest version:
-
-```shell
-brew update
-brew upgrade golang
-```
-
-#### Chocolatey (Windows)
-
-Issue the following command from the powershell:
-
-```shell
-choco install golang
-```
-
-If it's already installed, run the following command to ensure it's the latest version:
-
-```shell
-choco upgrade golang
-```
-
-## Bringing to the next level
-
-Here are a few ideas that you can use to get more acquainted as to how this overall process works:
-
-* Create an additional API resource (e.g. /hello/{proxy+}) and return the name requested through this new path
-* Update unit test to capture that
-* Package & Deploy
-
-Next, you can use the following resources to know more about beyond hello world samples and how others structure their Serverless applications:
-
-* [AWS Serverless Application Repository](https://aws.amazon.com/serverless/serverlessrepo/)
+Using these tools and features, you can improve the traceability and observability of your serverless applications and make it easier to identify and debug issues.
